@@ -6,11 +6,6 @@ and background see: http://www.nypl.org/blog/2014/09/03/generative-ebook-covers
 """
 
 #
-# Revision history
-# - June 2015, Jens Troeger: initial port from Processing to Python
-#
-
-#
 # The Image class wraps Pillow (PIL, Python Imaging Library) functionality into
 # a Processing inspired interface.
 #
