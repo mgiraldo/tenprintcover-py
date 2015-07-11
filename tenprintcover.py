@@ -291,7 +291,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
     # that only a certain range is used for the title; characters outside of
     # that range are replaced with a somewhat random character.
     def c64Convert():
-        c64_letters = " qQwWeErRtTyYuUiIoOpPaAsSdDfFgGhHjJkKlL:zZxXcCvVbBnNmM1234567890."
+        c64_letters = " qQwWeErRtTyYuUiIoOpPaAsSdDfFgGhHjJkKlL:zZxXcCvVbBnNmM,;?<>@[]1234567890.=-+*/"
         c64_title = ""
         for c in title:
             if c in c64_letters:
@@ -377,6 +377,24 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
             cover_image.rect(x, y, s, s, shape_color)
             cover_image.triangle(x+thick, y, x+s, y, x+s, y+s-thick, base_color)
             cover_image.triangle(x, y+thick, x, y+s, x+s-thick, y + s, base_color)
+        elif c == "," :
+            cover_image.rect(x+(s/2), y+(s/2), s/2, s/2, shape_color)
+        elif c == ";" :
+            cover_image.rect(x, y+(s/2), s/2, s/2, shape_color)
+        elif c == "?" :
+            cover_image.rect(x, y, s/2, s/2, shape_color)
+            cover_image.rect(x+(s/2), y+(s/2), s/2, s/2, shape_color)
+        elif c == "<" :
+            cover_image.rect(x+(s/2), y, s/2, s/2, shape_color)
+        elif c == ">" :
+            cover_image.rect(x, y, s/2, s/2, shape_color)
+        elif c == "@" :
+            cover_image.rect(x, y+(s/2)-(thick/2), s, thick, shape_color)
+        elif c == "[" :
+            cover_image.rect(x+(s/2)-(thick/2), y, thick, s, shape_color)
+        elif c == "]" :
+            cover_image.rect(x, y+(s/2)-(thick/2), s, thick, shape_color)
+            cover_image.rect(x+(s/2)-(thick/2), y, thick, s, shape_color)
         elif c == "0":
             cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), thick, s/2+thick/2, shape_color)
             cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), s/2+thick/2, thick, shape_color)
@@ -400,11 +418,23 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         elif c == "8":
             cover_image.rect(x, y, s, thick*3, shape_color)
         elif c == "9":
-            cover_image.rect(x, y, thick, s, shape_color)
             cover_image.rect(x, y+s-(thick*3), s, thick*3, shape_color)
         elif c == ".":
             cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), thick, s/2+thick/2, shape_color)
             cover_image.rect(x, y+(s/2)-(thick/2), s/2+thick/2, thick, shape_color)
+        elif c == "=" :
+            cover_image.rect(x+(s/2)-(thick/2), y, thick, s/2+thick/2, shape_color)
+            cover_image.rect(x, y+(s/2)-(thick/2), s/2, thick, shape_color)
+        elif c == "-" :
+            cover_image.rect(x+(s/2)-(thick/2), y, thick, s/2+thick/2, shape_color)
+            cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), s/2+thick/2, thick, shape_color)
+        elif c == "+" :
+            cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), s/2+thick/2, thick, shape_color)
+            cover_image.rect(x+(s/2)-(thick/2), y, thick, s, shape_color)
+        elif c == "*" :
+            cover_image.rect(x+s-(thick*2), y, thick*2, s, shape_color)
+        elif c == "/" :
+            cover_image.rect(x, y+s-(thick*2), s, thick*2, shape_color)
         elif c == " ":
             cover_image.rect(x, y, s, s, base_color)
         else:
