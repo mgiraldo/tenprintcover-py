@@ -7,7 +7,7 @@ Author: Jens Tröger for [Bookalope]
 
 Based on: [10 PRINT "BOOK COVER" for Processing]
 
-Processing-based book cover-generating algorithm based on [10PRINT](http://10print.org/). Artwork is inspired by the symbols found on the [Commodore PET](https://en.wikipedia.org/wiki/Commodore_PET) keyboard: ![Commodore PET keyboard](https://en.wikipedia.org/wiki/PETSCII#/media/File:PET_Keyboard.svg)
+Processing-based book cover-generating algorithm based on [10PRINT](http://10print.org/). Artwork is inspired by the symbols found on the [Commodore PET](https://en.wikipedia.org/wiki/Commodore_PET) keyboard: ![Commodore PET keyboard](https://upload.wikimedia.org/wikipedia/commons/d/db/PET_Keyboard.svg)
 
 #### Other versions
 - [10 PRINT "BOOK COVER" for iOS/Objective-C]
