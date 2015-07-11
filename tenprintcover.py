@@ -245,8 +245,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         invert = True
 
         counts = len(title) + len(author)
-        # assert 2 <= counts <= 80
-        color_seed = int(_map(counts, 2, 80, 10, 360))
+        color_seed = int(_map(_clip(counts, 2, 80), 2, 80, 10, 360))
         shape_color = Image.colorHSB(color_seed, base_saturation, base_brightness-(counts % 20))
         base_color = Image.colorHSB((color_seed + color_distance) % 360, base_saturation, base_brightness)
         if invert:
