@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Python Implementation of the TenPrint Cover Processing script. For more information
+and background see: http://www.nypl.org/blog/2014/09/03/generative-ebook-covers
+"""
+
 #
 # Revision history
 # - June 2015, Jens Troeger: initial port from Processing to Python
@@ -12,7 +17,7 @@
 
 import PIL.Image, PIL.ImageDraw, PIL.ImageFont, PIL.ImageColor
 
-class Image :
+class Image:
     """
     The Image class is a composition of different modules from the Python
     Imaging Library Pillow (a PIL fork). For more documentation on the modules
@@ -30,7 +35,7 @@ class Image :
             of Pillow would be a better idea: http://cairographics.org/pycairo/
     """
 
-    def __init__(self, width, height) :
+    def __init__(self, width, height):
         """
         Constructor. Creates an Image instance which represents an image with
         the width x height dimension.
@@ -39,7 +44,7 @@ class Image :
         self.draw = PIL.ImageDraw.Draw(self.image)
 
 
-    def triangle(self, x1, y1, x2, y2, x3, y3, color) :
+    def triangle(self, x1, y1, x2, y2, x3, y3, color):
         """
         See the Processing function triangle():
         https://processing.org/reference/triangle_.html
@@ -47,7 +52,7 @@ class Image :
         self.draw.polygon([x1, y1, x2, y2, x3, y3], fill=color)
 
 
-    def rect(self, x, y, width, height, color) :
+    def rect(self, x, y, width, height, color):
         """
         See the Processing function rect():
         https://processing.org/reference/rect_.html
@@ -55,7 +60,7 @@ class Image :
         self.draw.rectangle([x, y, x + width, y + height], fill=color)
 
 
-    def ellipse(self, x, y, width, height, color) :
+    def ellipse(self, x, y, width, height, color):
         """
         See the Processing function ellipse():
         https://processing.org/reference/ellipse_.html
@@ -63,7 +68,7 @@ class Image :
         self.draw.ellipse([x, y, x + width, y + height], fill=color)
 
 
-    def arc(self, x, y, width, height, start, end, fill, thick=1, segments=100) :
+    def arc(self, x, y, width, height, start, end, fill, thick=1, segments=100):
         """
         This is different than the Processing function arc():
         https://processing.org/reference/arc_.html
@@ -103,10 +108,10 @@ class Image :
             dx = -math.sin(a) * rx / (rx+ry)
             dy = math.cos(a) * ry / (rx+ry)
             # Draw.
-            self.draw.line([(x-dx*l,y-dy*l), (x+dx*l, y+dy*l)], fill=fill, width=thick)
+            self.draw.line([(x-dx*l, y-dy*l), (x+dx*l, y+dy*l)], fill=fill, width=thick)
 
 
-    def text(self, text, x, y, width, height, color, font) :
+    def text(self, text, x, y, width, height, color, font):
         """
         See the Processing function text():
         https://processing.org/reference/text_.html
@@ -114,13 +119,17 @@ class Image :
 
         # Helper function: take a word longer than the bounding box's width and
         # chop of as many letters in the beginning as fit, followed by an ellipsis.
-        def chop(word) :
+        def chop(word):
+            """
+            Given a word check if it fits into the bounding box and, if not, chop
+            it off and append an ellipsis so that the word fits.
+            """
             total_str = ""
-            total_width, _ = font.getsize("...")
-            for c in word :
+            total_width, _ = font.getsize("…")
+            for c in word:
                 c_width, _ = font.getsize(c)
-                if total_width + c_width > width :
-                    return total_str + c + "..."
+                if total_width + c_width > width:
+                    return total_str + c + "…"
                 total_str += c
                 total_width += c_width
             assert not "Should not be here, else 'word' fit into the bounding box"
@@ -130,33 +139,33 @@ class Image :
         # Initialize text cursor to the top/left of the bounding box.
         w_x, w_y = x, y
         # Draw the text word by word and check bounding box.
-        for word in text.split(" ") :
+        for word in text.split(" "):
             w_width, w_height = font.getsize(word)
             # Overflowing width, break to the next line with leading.
-            if w_x + w_width > width :
+            if w_x + w_width > width:
                 # Special case: first word exceeds total length of a line.
-                if w_x == x :
+                if w_x == x:
                     word = chop(word)
-                else :
+                else:
                     w_x, w_y = x, w_y + w_height + (space_height * 0.1)
                     # New line is outside height of the bounding box, done.
-                    if w_y + w_height > height :
-                        break;
+                    if w_y + w_height > height:
+                        break
             # Draw the word and move on to the position of the next.
             self.draw.text([w_x, w_y], word, fill=color, font=font)
             w_x += space_width + w_width
 
 
-    def save(self, filename, format) :
+    def save(self, filename, fmt):
         """
         Save this Image instance to the given filename, and encode it based
         on the given extension. It's assumed that filename and extension match.
         """
-        self.image.save(filename, format)
+        self.image.save(filename, fmt)
 
 
     @staticmethod
-    def font(name, size) :
+    def font(name, size):
         """
         Return a Pillow font instance for the given Truetype font 'name' of
         the given size 'size'.
@@ -165,7 +174,7 @@ class Image :
 
 
     @staticmethod
-    def colorHSB(h, s, b) :
+    def colorHSB(h, s, b):
         """
         Given the H,S,B values for the HSB color mode, convert them into the
         H,S,L values for the HSL color mode and return a Pillow color instance.
@@ -180,12 +189,32 @@ class Image :
 
 
     @staticmethod
-    def colorRGB(r, g, b) :
+    def colorRGB(r, g, b):
         """
         Given the R,G,B values for the RGB color mode, return a Pillow color
         instance.
         """
         return PIL.ImageColor.getrgb("rgb({}, {}, {})".format(r, g, b))
+
+
+#
+# Private helper functions.
+#
+
+def _map(value, istart, istop, ostart, ostop):
+    """
+    Helper function that implements the Processing function map(). For more
+    details see https://processing.org/reference/map_.html
+    http://stackoverflow.com/questions/17134839/how-does-the-map-function-in-processing-work
+    """
+    return ostart + (ostop - ostart) * ((value - istart) / (istop - istart))
+
+
+def _clip(value, lower, upper):
+    """
+    Helper function to clip a given value based on a lower/upper bound.
+    """
+    return lower if value < lower else upper if value > upper else value
 
 
 #
@@ -200,29 +229,16 @@ import math
 import os
 import sys
 
-def draw(title, subtitle, author, cover_width=400, cover_height=600) :
+def draw(title, subtitle, author, cover_width=400, cover_height=600):
     """
     Main drawing function, which generates a cover of the given dimension and
     renders title, author, and graphics.
     """
 
-    # Helper function that implements the Processing function map(). For more
-    # details see
-    # https://processing.org/reference/map_.html
-    # http://stackoverflow.com/questions/17134839/how-does-the-map-function-in-processing-work
-    def _map(value, istart, istop, ostart, ostop) :
-        return ostart + (ostop - ostart) * ((value - istart) / (istop - istart))
-
-
-    # Helper function to clip a given value based on a lower/upper bound.
-    def _clip(value, lower, upper) :
-        return lower if value < lower else upper if value > upper else value
-
-
     # Based on some initial constants and the title+author strings, generate a base
     # background color and a shape color to draw onto the background. Try to keep
     # these two colors somewhat compatible with each other by varying only their hue.
-    def _processColors() :
+    def processColors():
         base_saturation = 100
         base_brightness = 90
         color_distance = 100
@@ -233,15 +249,15 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600) :
         color_seed = int(_map(counts, 2, 80, 10, 360))
         shape_color = Image.colorHSB(color_seed, base_saturation, base_brightness-(counts % 20))
         base_color = Image.colorHSB((color_seed + color_distance) % 360, base_saturation, base_brightness)
-        if invert :
+        if invert:
             shape_color, base_color = base_color, shape_color
-        if 0 == counts % 10 :
+        if 0 == counts % 10:
             shape_color, base_color = base_color, shape_color
         return shape_color, base_color
 
 
     # Fill the background of the image with white.
-    def _drawBackground() :
+    def drawBackground():
         fill = Image.colorRGB(255, 255, 255)
         cover_image.rect(0, 0, cover_width, cover_height, fill)
 
@@ -249,24 +265,24 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600) :
     # Draw the actual artwork for the cover. Given the length of the title string,
     # generate an appropriate sized grid and draw C64 PETSCII into each of the cells.
     # https://www.c64-wiki.com/index.php/PETSCII
-    def _drawArtwork() :
+    def drawArtwork():
         artwork_start_x = 0
         artwork_start_y = cover_height - cover_width
 
-        grid_count, grid_total, grid_size = _breakGrid()
+        grid_count, grid_total, grid_size = breakGrid()
         cover_image.rect(0, 0, cover_width, cover_height * cover_margin / 100, base_color)
         cover_image.rect(0, 0 + artwork_start_y, cover_width, cover_width, base_color)
-        c64_title = _c64Convert()
-        for c, i in zip(itertools.cycle(c64_title), range(0, grid_total)) :
+        c64_title = c64Convert()
+        for c, i in zip(itertools.cycle(c64_title), range(0, grid_total)):
             grid_x = int(i % grid_count)
             grid_y = int(i / grid_count)
             x = grid_x * grid_size + artwork_start_x
             y = grid_y * grid_size + artwork_start_y
-            _drawShape(c, x, y, grid_size)
+            drawShape(c, x, y, grid_size)
 
 
     # Compute the graphics grid size based on the length of the book title.
-    def _breakGrid() :
+    def breakGrid():
         min_title = 2
         max_title = 60
         length = _clip(len(title), min_title, max_title)
@@ -280,129 +296,129 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600) :
     # Given the title of the book, filter through its characters and ensure
     # that only a certain range is used for the title; characters outside of
     # that range are replaced with a somewhat random character.
-    def _c64Convert() :
+    def c64Convert():
         c64_letters = " qQwWeErRtTyYuUiIoOpPaAsSdDfFgGhHjJkKlL:zZxXcCvVbBnNmM1234567890."
         c64_title = ""
-        for c in title :
-            if c in c64_letters :
+        for c in title:
+            if c in c64_letters:
                 c64_title += c
-            else :
-                c64_title += c64_letters[ ord(c) % len(c64_letters) ]
+            else:
+                c64_title += c64_letters[ord(c) % len(c64_letters)]
         return c64_title
 
 
     # Given an alphabetic character from the book's title string and the x, y
     # coordinates and size of the cell within the cover grid, draw a PETSCII
     # shape into that cell.
-    def _drawShape(c, x, y, s) :
-        shapeThickness = 10
-        thick = int(s * shapeThickness / 100)
-        if c in "qQ" :
+    def drawShape(c, x, y, s):
+        shape_thickness = 10
+        thick = int(s * shape_thickness / 100)
+        if c in "qQ":
             cover_image.ellipse(x, y, s, s, shape_color)
-        elif c in "wW" :
+        elif c in "wW":
             cover_image.ellipse(x, y, s, s, shape_color)
             cover_image.ellipse(x+thick, y+thick, s-(thick*2), s-(thick*2), base_color)
-        elif c in "eE" :
+        elif c in "eE":
             cover_image.rect(x, y+thick, s, thick, shape_color)
-        elif c in "rR" :
+        elif c in "rR":
             cover_image.rect(x, y+s-(thick*2), s, thick, shape_color)
-        elif c in "tT" :
+        elif c in "tT":
             cover_image.rect(x+thick, y, thick, s, shape_color)
-        elif c in "yY" :
+        elif c in "yY":
             cover_image.rect(x+s-(thick*2), y, thick, s, shape_color)
-        elif c in "uU" :
+        elif c in "uU":
             cover_image.arc(x, y, 2*s, 2*s, 180, 270, shape_color, thick)
-        elif c in "iI" :
+        elif c in "iI":
             cover_image.arc(x-s, y, 2*s, 2*s, 270, 360, shape_color, thick)
-        elif c in "oO" :
+        elif c in "oO":
             cover_image.rect(x, y, s, thick, shape_color)
             cover_image.rect(x, y, thick, s, shape_color)
-        elif c in "pP" :
+        elif c in "pP":
             cover_image.rect(x, y, s, thick, shape_color)
             cover_image.rect(x+s-thick, y, thick, s, shape_color)
-        elif c in "aA" :
+        elif c in "aA":
             cover_image.triangle(x, y+s, x+(s/2), y, x+s, y+s, shape_color)
-        elif c in "sS" :
+        elif c in "sS":
             cover_image.triangle(x, y, x+(s/2), y+s, x+s, y, shape_color)
-        elif c in "dD" :
+        elif c in "dD":
             cover_image.rect(x, y+(thick*2), s, thick, shape_color)
-        elif c in "fF" :
+        elif c in "fF":
             cover_image.rect(x, y+s-(thick*3), s, thick, shape_color)
-        elif c in "gG" :
+        elif c in "gG":
             cover_image.rect(x+(thick*2), y, thick, s, shape_color)
-        elif c in "hH" :
+        elif c in "hH":
             cover_image.rect(x+s-(thick*3), y, thick, s, shape_color)
-        elif c in "jJ" :
+        elif c in "jJ":
             cover_image.arc(x, y-s, 2*s, 2*s, 90, 180, shape_color, thick)
-        elif c in "kK" :
+        elif c in "kK":
             cover_image.arc(x-s, y-s, 2*s, 2*s, 0, 90, shape_color, thick)
-        elif c in "lL" :
+        elif c in "lL":
             cover_image.rect(x, y, thick, s, shape_color)
             cover_image.rect(x, y+s-thick, s, thick, shape_color)
-        elif c == ":" :
+        elif c == ":":
             cover_image.rect(x+s-thick, y, thick, s, shape_color)
             cover_image.rect(x, y+s-thick, s, thick, shape_color)
-        elif c in "zZ" :
+        elif c in "zZ":
             cover_image.triangle(x, y+(s/2), x+(s/2), y, x+s, y+(s/2), shape_color)
             cover_image.triangle(x, y+(s/2), x+(s/2), y+s, x+s, y+(s/2), shape_color)
-        elif c in "xX" :
+        elif c in "xX":
             cover_image.ellipse(x+(s/2), y+(s/3), thick*2, thick*2, shape_color)
             cover_image.ellipse(x+(s/3), y+s-(s/3), thick*2, thick*2, shape_color)
             cover_image.ellipse(x+s-(s/3), y+s-(s/3), thick*2, thick*2, shape_color)
-        elif c in "cC" :
+        elif c in "cC":
             cover_image.rect(x, y + (thick * 3), s, thick, shape_color)
-        elif c in "vV" :
+        elif c in "vV":
             cover_image.rect(x, y, s, s, shape_color)
             cover_image.triangle(x+thick, y, x+(s/2), y+(s/2)-thick, x+s-thick, y, base_color)
             cover_image.triangle(x, y+thick, x+(s/2)-thick, y+(s/2), x, y+s-thick, base_color)
             cover_image.triangle(x+thick, y+s, x+(s/2), y+(s/2)+thick, x+s-thick, y+s, base_color)
             cover_image.triangle(x+s, y+thick, x+s, y+s-thick, x+(s/2)+thick, y+(s/2), base_color)
-        elif c in "bB" :
+        elif c in "bB":
             cover_image.rect(x+(thick*3), y, thick, s, shape_color)
-        elif c in "nN" :
+        elif c in "nN":
             cover_image.rect(x, y, s, s, shape_color)
             cover_image.triangle(x, y, x+s-thick, y, x, y+s-thick, base_color)
             cover_image.triangle(x+thick, y+s, x+s, y+s, x+s, y+thick, base_color)
-        elif c in "mM" :
+        elif c in "mM":
             cover_image.rect(x, y, s, s, shape_color)
             cover_image.triangle(x+thick, y, x+s, y, x+s, y+s-thick, base_color)
             cover_image.triangle(x, y+thick, x, y+s, x+s-thick, y + s, base_color)
-        elif c == "0" :
+        elif c == "0":
             cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), thick, s/2+thick/2, shape_color)
             cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), s/2+thick/2, thick, shape_color)
-        elif c == "1" :
+        elif c == "1":
             cover_image.rect(x, y+(s/2)-(thick/2), s, thick, shape_color)
             cover_image.rect(x+(s/2)-(thick/2), y, thick, s/2+thick/2, shape_color)
-        elif c == "2" :
+        elif c == "2":
             cover_image.rect(x, y+(s/2)-(thick/2), s, thick, shape_color)
             cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), thick, s/2+thick/2, shape_color)
-        elif c == "3" :
+        elif c == "3":
             cover_image.rect(x, y+(s/2)-(thick/2), s/2+thick/2, thick, shape_color)
             cover_image.rect(x+(s/2)-(thick/2), y, thick, s, shape_color)
-        elif c == "4" :
+        elif c == "4":
             cover_image.rect(x, y, thick*2, s, shape_color)
-        elif c == "5" :
+        elif c == "5":
             cover_image.rect(x, y, thick*3, s, shape_color)
-        elif c == "6" :
+        elif c == "6":
             cover_image.rect(x+s-(thick*3), y, thick*3, s, shape_color)
-        elif c == "7" :
+        elif c == "7":
             cover_image.rect(x, y, s, thick*2, shape_color)
-        elif c == "8" :
+        elif c == "8":
             cover_image.rect(x, y, s, thick*3, shape_color)
-        elif c == "9" :
+        elif c == "9":
             cover_image.rect(x, y, thick, s, shape_color)
             cover_image.rect(x, y+s-(thick*3), s, thick*3, shape_color)
-        elif c == "." :
+        elif c == ".":
             cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), thick, s/2+thick/2, shape_color)
             cover_image.rect(x, y+(s/2)-(thick/2), s/2+thick/2, thick, shape_color)
-        elif c == " " :
+        elif c == " ":
             cover_image.rect(x, y, s, s, base_color)
-        else :
+        else:
             assert not "Implement."
 
 
     # Allocate fonts for the title and the author, and draw the text.
-    def _drawText() :
+    def drawText():
         fill = Image.colorRGB(50, 50, 50)
 
         title_font_size = int(cover_width * 0.08)
@@ -431,48 +447,44 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600) :
     cover_image = Image(cover_width, cover_height)
 
     # If any, append the book's subtitle to the title.
-    if subtitle :
+    if subtitle:
         title += ": " + subtitle
 
     # Draw the book cover.
-    shape_color, base_color = _processColors()
-    _drawBackground()
-    _drawArtwork()
-    _drawText()
+    shape_color, base_color = processColors()
+    drawBackground()
+    drawArtwork()
+    drawText()
 
     # Return the cover Image instance.
     return cover_image
 
 
 #
-# Run this as a stand-alone command-line tool as well.
+# The main function allows to run the cover generation to run as a standalone
+# command-line tool. Arguments can be passed, use -h or --help to get a list
+# of available switches. The generated book cover is saved as an image file.
 #
 
-if __name__ == "__main__" :
-    """
-    The main function allows to run the cover generation to run as a standalone
-    command-line tool. Arguments can be passed, use -h or --help to get a list
-    of available switches. The generated book cover is saved as an image file.
-    """
+if __name__ == "__main__":
     status = 0
 
     # Helper function to draw a cover and write it to a file. Python PIL supports
     # to write many more image formats, but we're restricting it to only three
     # (I'm too lazy to type more).
-    def _draw_and_save(title, subtitle, author, filename) :
+    def _draw_and_save(title, subtitle, author, filename):
         cover_image = draw(title, subtitle, author)
-        if filename == "-" :
+        if filename == "-":
             assert not "Implement."
-        else :
-            ext = os.path.splitext( os.path.basename( filename ) )[1][1:]
-            if ext.upper() not in [ "JPEG", "PNG", "TIFF" ] :
+        else:
+            ext = os.path.splitext(os.path.basename(filename))[1][1:]
+            if ext.upper() not in ["JPEG", "PNG", "TIFF"]:
                 print("Unsupported image file format '" + ext + "', use JPEG, PNG, or TIFF")
-                status = 1
-            else :
-                with open(filename, "wb") as f :
+                return 1
+            else:
+                with open(filename, "wb") as f:
                     cover_image.save(f, ext)
-        status = 0
-        return status
+        return 0
 
 
     # Set up and parse the command line arguments passed to the program.
@@ -492,31 +504,31 @@ if __name__ == "__main__" :
     # book covers. The file contains lines of JSON maps of the format
     #
     #   {"authors": "..", "identifier": "..", "subtitle": null, "title": "..", "identifier_type": "Gutenberg ID", "filename": ".."}
-    if args.json_covers :
-        if os.path.isfile(args.json_covers) :
-            with open(args.json_covers, "r") as f :
-                try :
-                    for line in f :
+    if args.json_covers:
+        if os.path.isfile(args.json_covers):
+            with open(args.json_covers, "r") as f:
+                try:
+                    for line in f:
                         data = json.loads(line)
                         print("Generating cover for " + data["identifier"])
                         status = _draw_and_save(data["title"], data["subtitle"], data["authors"], data["filename"])
-                except ValueError :
+                except ValueError:
                     print("Error reading from JSON file, exiting")
                     status = 1
-        else :
+        else:
             print("JSON cover file does not exist: " + args.json_covers)
             status = 1
 
 
     # Generate only a single cover based on the given command line arguments.
-    else :
-        if not args.title or not args.author :
+    else:
+        if not args.title or not args.author:
             print("Missing --title or --author argument, exiting")
             status = 1
-        elif not args.outfile :
+        elif not args.outfile:
             print("No outfile specified, exiting")
             status = 1
-        else :
+        else:
             status = _draw_and_save(args.title, args.subtitle, args.author, args.outfile)
 
 
