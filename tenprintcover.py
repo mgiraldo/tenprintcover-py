@@ -490,13 +490,18 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
 # of available switches. The generated book cover is saved as an image file.
 #
 
-if __name__ == "__main__":
-    status = 0
-
-    # Helper function to draw a cover and write it to a file. Python PIL supports
-    # to write many more image formats, but we're restricting it to only three
-    # (I'm too lazy to type more).
+def main():
+    """
+    The main() function handles command line arguments and maneuvers the cover
+    image generation.
+    """
+    # Helper function.
     def _draw_and_save(title, subtitle, author, filename):
+        """
+        Draw a cover and write it to a file. Python PIL supports to write many
+        more image formats, but we're restricting it to only three (I'm too lazy
+        to type more).
+        """
         cover_image = draw(title, subtitle, author)
         if filename == "-":
             assert not "Implement."
@@ -506,10 +511,13 @@ if __name__ == "__main__":
                 print("Unsupported image file format '" + ext + "', use JPEG, PNG, or TIFF")
                 return 1
             else:
-                with open(filename, "wb") as f:
-                    cover_image.save(f, ext)
+                try:
+                    with open(filename, "wb") as f:
+                        cover_image.save(f, ext)
+                except FileNotFoundError:
+                    print("Error opening target file " + filename)
+                    return 1
         return 0
-
 
     # Set up and parse the command line arguments passed to the program.
     usage = ""
@@ -522,39 +530,40 @@ if __name__ == "__main__":
     parser.add_argument("-j", "--json-covers", dest="json_covers", help="JSON file containing cover information")
     args = parser.parse_args()
 
-
     # A JSON file is given as command line parameter; ignore the other ones.
     # Read the file line by line and use the given information to generate the
     # book covers. The file contains lines of JSON maps of the format
     #
-    #   {"authors": "..", "identifier": "..", "subtitle": null, "title": "..", "identifier_type": "Gutenberg ID", "filename": ".."}
+    #   {"authors": "..", "identifier": "..", "subtitle": null, "title": "..",
+    #    "identifier_type": "Gutenberg ID", "filename": ".."}
     if args.json_covers:
-        if os.path.isfile(args.json_covers):
+        try:
             with open(args.json_covers, "r") as f:
-                try:
-                    for line in f:
-                        data = json.loads(line)
-                        print("Generating cover for " + data["identifier"])
-                        status = _draw_and_save(data["title"], data["subtitle"], data["authors"], data["filename"])
-                except ValueError:
-                    print("Error reading from JSON file, exiting")
-                    status = 1
-        else:
+                for line in f:
+                    data = json.loads(line)
+                    print("Generating cover for " + data["identifier"])
+                    status = _draw_and_save(data["title"], data["subtitle"], data["authors"], data["filename"])
+                    if status:
+                        print("Error generating book cover image, skipping")
+        except ValueError:
+            print("Error reading from JSON file, exiting")
+        except FileNotFoundError:
             print("JSON cover file does not exist: " + args.json_covers)
-            status = 1
-
 
     # Generate only a single cover based on the given command line arguments.
     else:
         if not args.title or not args.author:
             print("Missing --title or --author argument, exiting")
-            status = 1
         elif not args.outfile:
             print("No outfile specified, exiting")
-            status = 1
         else:
-            status = _draw_and_save(args.title, args.subtitle, args.author, args.outfile)
+            return _draw_and_save(args.title, args.subtitle, args.author, args.outfile)
+    return 1
 
 
-    # Terminate the program.
-    sys.exit(status)
+#
+# When run standalone, invoke the main() function here.
+#
+
+if __name__ == "__main__":
+    sys.exit(main())
