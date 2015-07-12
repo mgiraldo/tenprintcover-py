@@ -360,7 +360,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
             cover_image.ellipse(x+(s/3), y+s-(s/3), thick*2, thick*2, shape_color)
             cover_image.ellipse(x+s-(s/3), y+s-(s/3), thick*2, thick*2, shape_color)
         elif c in "cC":
-            cover_image.rect(x, y + (thick * 3), s, thick, shape_color)
+            cover_image.rect(x, y+(thick*3), s, thick, shape_color)
         elif c in "vV":
             cover_image.rect(x, y, s, s, shape_color)
             cover_image.triangle(x+thick, y, x+(s/2), y+(s/2)-thick, x+s-thick, y, base_color)
@@ -377,22 +377,22 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
             cover_image.rect(x, y, s, s, shape_color)
             cover_image.triangle(x+thick, y, x+s, y, x+s, y+s-thick, base_color)
             cover_image.triangle(x, y+thick, x, y+s, x+s-thick, y + s, base_color)
-        elif c == "," :
+        elif c == ",":
             cover_image.rect(x+(s/2), y+(s/2), s/2, s/2, shape_color)
-        elif c == ";" :
+        elif c == ";":
             cover_image.rect(x, y+(s/2), s/2, s/2, shape_color)
-        elif c == "?" :
+        elif c == "?":
             cover_image.rect(x, y, s/2, s/2, shape_color)
             cover_image.rect(x+(s/2), y+(s/2), s/2, s/2, shape_color)
-        elif c == "<" :
+        elif c == "<":
             cover_image.rect(x+(s/2), y, s/2, s/2, shape_color)
-        elif c == ">" :
+        elif c == ">":
             cover_image.rect(x, y, s/2, s/2, shape_color)
-        elif c == "@" :
+        elif c == "@":
             cover_image.rect(x, y+(s/2)-(thick/2), s, thick, shape_color)
-        elif c == "[" :
+        elif c == "[":
             cover_image.rect(x+(s/2)-(thick/2), y, thick, s, shape_color)
-        elif c == "]" :
+        elif c == "]":
             cover_image.rect(x, y+(s/2)-(thick/2), s, thick, shape_color)
             cover_image.rect(x+(s/2)-(thick/2), y, thick, s, shape_color)
         elif c == "0":
@@ -422,18 +422,18 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         elif c == ".":
             cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), thick, s/2+thick/2, shape_color)
             cover_image.rect(x, y+(s/2)-(thick/2), s/2+thick/2, thick, shape_color)
-        elif c == "=" :
+        elif c == "=":
             cover_image.rect(x+(s/2)-(thick/2), y, thick, s/2+thick/2, shape_color)
             cover_image.rect(x, y+(s/2)-(thick/2), s/2, thick, shape_color)
-        elif c == "-" :
+        elif c == "-":
             cover_image.rect(x+(s/2)-(thick/2), y, thick, s/2+thick/2, shape_color)
             cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), s/2+thick/2, thick, shape_color)
-        elif c == "+" :
+        elif c == "+":
             cover_image.rect(x+(s/2)-(thick/2), y+(s/2)-(thick/2), s/2+thick/2, thick, shape_color)
             cover_image.rect(x+(s/2)-(thick/2), y, thick, s, shape_color)
-        elif c == "*" :
+        elif c == "*":
             cover_image.rect(x+s-(thick*2), y, thick*2, s, shape_color)
-        elif c == "/" :
+        elif c == "/":
             cover_image.rect(x, y+s-(thick*2), s, thick*2, shape_color)
         elif c == " ":
             cover_image.rect(x, y, s, s, base_color)
