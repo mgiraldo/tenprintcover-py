@@ -6,37 +6,52 @@ and background see: http://www.nypl.org/blog/2014/09/03/generative-ebook-covers
 """
 
 #
-# The Image class wraps Pillow (PIL, Python Imaging Library) functionality into
-# a Processing inspired interface.
+# The Image class wraps Cairo functionality into a Processing inspired interface.
 #
 
-import PIL.Image, PIL.ImageDraw, PIL.ImageFont, PIL.ImageColor
+import cairocffi as cairo
 
 class Image:
     """
-    The Image class is a composition of different modules from the Python
-    Imaging Library Pillow (a PIL fork). For more documentation on the modules
-    refer to the documentation:
+    The Image class is a composition of different modules from Python's Cairo
+    bindings. For more documentation on the use of Cairo and the Python bindings
+    see here:
 
-      http://pillow.readthedocs.org/reference/index.html
+      https://github.com/SimonSapin/cairocffi
+      http://cairographics.org/pycairo/ (outdated)
 
     Furthermore, instances of this class provide functions that resemble the
     original Processing functions and map them to Pillow functions. That makes
     porting the original Processing code easier.
-
-    BUGBUG: It seems to me that Pillow is not the most accurate way of drawing,
-            the text seems to wobble and arcs break out of their respective bounding
-            box. No support for anti-aliasing either. Perhaps using PyCairo instead
-            of Pillow would be a better idea: http://cairographics.org/pycairo/
     """
 
     def __init__(self, width, height):
         """
-        Constructor. Creates an Image instance which represents an image with
-        the width x height dimension.
+        Constructor. Create a Cairo image surface and a render context, and disables
+        anti-aliasing for the image to keep the lines sharp.
         """
-        self.image = PIL.Image.new("RGB", (width, height))
-        self.draw = PIL.ImageDraw.Draw(self.image)
+        self.width = width
+        self.height = height
+        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+        self.context = cairo.Context(self.surface)
+        self.context.scale(width, height)
+        self.context.set_antialias(cairo.ANTIALIAS_NONE)
+
+
+    def tx(self, x):
+        """
+        Transform the given X coordinate from a pixel value [0..width] to a
+        Cairo coordinate [0..1].
+        """
+        return x / self.width
+
+
+    def ty(self, y):
+        """
+        Transform the given Y coordinate from a pixel value [0..height] to a
+        Cairo coordinate [0..1].
+        """
+        return y / self.height
 
 
     def triangle(self, x1, y1, x2, y2, x3, y3, color):
@@ -44,7 +59,12 @@ class Image:
         See the Processing function triangle():
         https://processing.org/reference/triangle_.html
         """
-        self.draw.polygon([x1, y1, x2, y2, x3, y3], fill=color)
+        self.context.set_source_rgb(*color)
+        self.context.move_to(self.tx(x1), self.ty(y1))
+        self.context.line_to(self.tx(x2), self.ty(y2))
+        self.context.line_to(self.tx(x3), self.ty(y3))
+        self.context.line_to(self.tx(x1), self.ty(y1))
+        self.context.fill()
 
 
     def rect(self, x, y, width, height, color):
@@ -52,7 +72,9 @@ class Image:
         See the Processing function rect():
         https://processing.org/reference/rect_.html
         """
-        self.draw.rectangle([x, y, x + width, y + height], fill=color)
+        self.context.set_source_rgb(*color)
+        self.context.rectangle(self.tx(x), self.ty(y), self.tx(width), self.ty(height))
+        self.context.fill()
 
 
     def ellipse(self, x, y, width, height, color):
@@ -60,136 +82,143 @@ class Image:
         See the Processing function ellipse():
         https://processing.org/reference/ellipse_.html
         """
-        self.draw.ellipse([x, y, x + width, y + height], fill=color)
+        self.context.set_source_rgb(*color)
+        self.context.save()
+        self.context.translate(self.tx(x + (width / 2.0)), self.ty(y + (height / 2.0)))
+        self.context.scale(self.tx(width / 2.0), self.ty(height / 2.0))
+        self.context.arc(0.0, 0.0, 1.0, 0.0, 2 * math.pi)
+        self.context.fill()
+        self.context.restore()
 
 
-    def arc(self, x, y, width, height, start, end, fill, thick=1, segments=100):
+    def arc(self, x, y, width, height, start, end, color, thick=1, _=None):
         """
         This is different than the Processing function arc():
         https://processing.org/reference/arc_.html
 
-        In fact, Pillow does not provide for drawing an arc in a different pen
-        width. One solution would be to use the (outdated?) Aggdraw module that
-        can be found here: http://effbot.org/zone/pythondoc-aggdraw.htm
-
-        The implementation of this function was taken from a Stackoverflow
-        discussion: http://stackoverflow.com/questions/7070912/creating-an-arc-with-a-given-thickness-using-pils-imagedraw#22081171
+        Use the Cairo arc() function to draw an arc with a given line thickness.
         """
-        bbox = [x, y, x + width, y + height]
-        # Radians.
-        start *= math.pi / 180
-        end *= math.pi / 180
-        # Angle step.
-        da = (end - start) / segments
-        # Shift end points with half a segment angle.
-        start -= da / 2
-        end -= da / 2
-        # Ellipsis radii.
-        rx = (bbox[2] - bbox[0]) / 2
-        ry = (bbox[3] - bbox[1]) / 2
-        # Bounding box centre.
-        cx = bbox[0] + rx
-        cy = bbox[1] + ry
-        # Segment length.
-        l = (rx+ry) * da / 2.0
-
-        for i in range(segments):
-            # Angle centre.
-            a = start + (i+0.5) * da
-            # x,y centre.
-            x = cx + math.cos(a) * rx
-            y = cy + math.sin(a) * ry
-            # Derivatives.
-            dx = -math.sin(a) * rx / (rx+ry)
-            dy = math.cos(a) * ry / (rx+ry)
-            # Draw.
-            self.draw.line([(x-dx*l, y-dy*l), (x+dx*l, y+dy*l)], fill=fill, width=thick)
+        thick *= 4
+        self.context.set_source_rgb(*color)
+        self.context.save()
+        self.context.translate(self.tx(x+(width/2)), self.ty(y+(height/2)))
+        self.context.scale(self.tx(width/2), self.ty(height/2))
+        self.context.arc(0.0, 0.0, 1.0 - (self.tx(thick)/2), (2*math.pi*start)/360, (2*math.pi*end)/360)
+        self.context.set_line_width(self.tx(thick))
+        self.context.stroke()
+        self.context.restore()
 
 
     def text(self, text, x, y, width, height, color, font):
         """
         See the Processing function text():
         https://processing.org/reference/text_.html
-        """
 
-        # Helper function: take a word longer than the bounding box's width and
-        # chop of as many letters in the beginning as fit, followed by an ellipsis.
+        Consider using Pango in addition to Cairo here.
+        """
+        # Helper function.
         def chop(word):
             """
-            Given a word check if it fits into the bounding box and, if not, chop
-            it off and append an ellipsis so that the word fits.
+            Take a word longer than the bounding box's width and chop off as many
+            letters in the beginning as fit, followed by an ellipsis.
             """
             total_str = ""
-            total_width, _ = font.getsize("…")
             for c in word:
-                c_width, _ = font.getsize(c)
-                if total_width + c_width > width:
-                    return total_str + c + "…"
+                _, _, total_width, _, _, _ = self.context.text_extents(total_str + c + "…")
+                if total_width >= width:
+                    return total_str + "…"
                 total_str += c
-                total_width += c_width
             assert not "Should not be here, else 'word' fit into the bounding box"
-
-        # Width and height of a single space character.
-        space_width, space_height = font.getsize(" ")
-        # Initialize text cursor to the top/left of the bounding box.
-        w_x, w_y = x, y
-        # Draw the text word by word and check bounding box.
+        # Prepare the context for text rendering.
+        self.context.set_source_rgb(*color)
+        font_name, font_size = (font)
+        self.context.select_font_face(font_name)
+        self.context.set_font_size(font_size)
+        self.context.set_antialias(cairo.ANTIALIAS_DEFAULT)
+        # Get some font metrics.
+        font_asc, _, font_height, _, _ = self.context.font_extents()
+        # Initialize text cursor to the baseline of the font.
+        width, height = self.tx(width), self.ty(height)
+        w_x, w_y = self.tx(x), font_asc + self.ty(y)
+        # Draw the text one line at a time and ensure the bounding box.
+        line = ""
         for word in text.split(" "):
-            w_width, w_height = font.getsize(word)
-            # Overflowing width, break to the next line with leading.
-            if w_x + w_width > width:
-                # Special case: first word exceeds total length of a line.
-                if w_x == x:
-                    word = chop(word)
+            _, _, line_width, _, _, _ = self.context.text_extents(line + " " + word)
+            if line_width < width:
+                line += (" " if line else "") + word
+            else:
+                if not line:
+                    # First word of the line extends beyond the line: chop and done.
+                    self.context.move_to(w_x, w_y)
+                    self.context.show_text(chop(word))
+                    return
                 else:
-                    w_x, w_y = x, w_y + w_height + (space_height * 0.1)
-                    # New line is outside height of the bounding box, done.
-                    if w_y + w_height > height:
-                        break
-            # Draw the word and move on to the position of the next.
-            self.draw.text([w_x, w_y], word, fill=color, font=font)
-            w_x += space_width + w_width
+                    # Filled a line, render it, and move on to the next line.
+                    self.context.move_to(w_x, w_y)
+                    self.context.show_text(line)
+                    line = word
+                    w_y += font_height
+                    if w_y > height:
+                        return
+        self.context.move_to(w_x, w_y)
+        self.context.show_text(line)
 
 
-    def save(self, filename, fmt):
+    def save(self, filename):
         """
-        Save this Image instance to the given filename, and encode it based
-        on the given extension. It's assumed that filename and extension match.
+        Save this Image instance as PNG to the given filename. It is assumed
+        that the filename extension is .png!
         """
-        self.image.save(filename, fmt)
+        self.surface.write_to_png(filename)
 
 
-    @staticmethod
-    def font(name, size):
+    def font(self, name, size):
         """
         Return a Pillow font instance for the given Truetype font 'name' of
         the given size 'size'.
         """
-        return PIL.ImageFont.truetype(name, size)
+        return (name, self.ty(size))
 
 
     @staticmethod
     def colorHSB(h, s, b):
         """
-        Given the H,S,B values for the HSB color mode, convert them into the
-        H,S,L values for the HSL color mode and return a Pillow color instance.
-        This conversion is necessary because Pillow does not understand HSB. For
-        more details about this conversion see this explanation:
-        http://codeitdown.com/hsl-hsb-hsv-color/
+        Given the H,S,B (equivalent to H,S,V) values for the HSB color mode,
+        convert them into the R,G,B values for the RGB color mode and return a
+        color tuple. This conversion is necessary because Cairo understands
+        only RGB(A).
         """
-        H, S, B = h, s/100, b/100
-        L = 0.5 * B * (2 - S)
-        S = (B * S) / (1 - abs(2 * L - 1))
-        return PIL.ImageColor.getrgb("hsl({}, {}%, {}%)".format(H, int(100 * S), int(100 * L)))
+        H, S, B = float(h), float(s/100), float(b/100)
+        if S == 0.0:
+            return (B, B, B) # achromatic (grey)
+        h = H / 60
+        i = math.floor(h)
+        f = h - i
+        v = B
+        p = v * (1 - S)
+        q = v * (1 - S * f)
+        t = v * (1 - S * (1 - f))
+        if i == 0:
+            return (v, t, b)
+        elif i == 1:
+            return (q, v, p)
+        elif i == 2:
+            return (p, v, t)
+        elif i == 3:
+            return (p, q, v)
+        elif i == 4:
+            return (t, p, v)
+        else: # i == 5 (or i == 6 for the case of H == 360)
+            return (v, p, q)
 
 
     @staticmethod
     def colorRGB(r, g, b):
         """
-        Given the R,G,B values for the RGB color mode, return a Pillow color
-        instance.
+        Given the R,G,B int values for the RGB color mode in the range [0..255],
+        return a RGB color tuple with float values in the range [0..1].
         """
-        return PIL.ImageColor.getrgb("rgb({}, {}, {})".format(r, g, b))
+        return (float(r / 255), float(g / 255), float(b / 255))
 
 
 #
@@ -446,7 +475,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         fill = Image.colorRGB(50, 50, 50)
 
         title_font_size = int(cover_width * 0.08)
-        title_font = Image.font("CooperHewitt-Bold", title_font_size)
+        title_font = cover_image.font("CooperHewitt-Bold", title_font_size)
         title_height = int((cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.75)
 
         x = cover_height * cover_margin / 100
@@ -456,7 +485,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         cover_image.text(title, x, y, width, height, fill, title_font)
 
         author_font_size = int(cover_width * 0.07)
-        author_font = Image.font("CooperHewitt-Book", author_font_size)
+        author_font = cover_image.font("CooperHewitt-Book", author_font_size)
         author_height = int((cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.25)
 
         x = cover_height * cover_margin / 100
@@ -506,17 +535,17 @@ def main():
         if filename == "-":
             assert not "Implement."
         else:
-            ext = os.path.splitext(os.path.basename(filename))[1][1:]
-            if ext.upper() not in ["JPEG", "PNG", "TIFF"]:
-                print("Unsupported image file format '" + ext + "', use JPEG, PNG, or TIFF")
-                return 1
-            else:
+            _, ext = os.path.splitext(os.path.basename(filename))
+            if ext.upper() == ".PNG":
                 try:
                     with open(filename, "wb") as f:
-                        cover_image.save(f, ext)
+                        cover_image.save(f)
                 except FileNotFoundError:
                     print("Error opening target file " + filename)
                     return 1
+            else:
+                print("Unsupported image file format '" + ext + "', use PNG")
+                return 1
         return 0
 
     # Set up and parse the command line arguments passed to the program.
@@ -526,7 +555,7 @@ def main():
     parser.add_argument("-t", "--title", dest="title", help="Book title")
     parser.add_argument("-s", "--subtitle", dest="subtitle", help="Book subtitle", default="")
     parser.add_argument("-a", "--author", dest="author", help="Author(s) of the book")
-    parser.add_argument("-o", "--cover", dest="outfile", help="Filename of the cover image")
+    parser.add_argument("-o", "--cover", dest="outfile", help="Filename of the cover image in PNG format")
     parser.add_argument("-j", "--json-covers", dest="json_covers", help="JSON file containing cover information")
     args = parser.parse_args()
 
