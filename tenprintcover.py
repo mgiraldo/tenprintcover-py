@@ -549,7 +549,7 @@ def main():
         return 0
 
     # Set up and parse the command line arguments passed to the program.
-    usage = ""
+    usage = "Python implementation of the 10PRINT Cover image generator."
     parser = argparse.ArgumentParser(usage=usage)
 
     parser.add_argument("-t", "--title", dest="title", help="Book title")
