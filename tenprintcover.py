@@ -21,7 +21,7 @@ class Image:
       http://cairographics.org/pycairo/ (outdated)
 
     Furthermore, instances of this class provide functions that resemble the
-    original Processing functions and map them to Pillow functions. That makes
+    original Processing functions and map them to Cairo functions. That makes
     porting the original Processing code easier.
     """
 
@@ -174,8 +174,7 @@ class Image:
 
     def font(self, name, properties):
         """
-        Return a Pillow font instance for the given Truetype font 'name' of
-        the given size 'size'.
+        Return a tuple that contains font properties required for rendering.
         """
         size, slant, weight = (properties)
         return (name, (self.ty(size), slant, weight))
@@ -244,7 +243,7 @@ def _clip(value, lower, upper):
 
 #
 # The draw() function creates an Image instance and draws the cover. Returns
-# an Image instance which is a composition of different Pillow functionality.
+# an Image instance which is a composition of different Cairo functionality.
 #
 
 import argparse
@@ -531,9 +530,7 @@ def main():
     # Helper function.
     def _draw_and_save(title, subtitle, author, filename):
         """
-        Draw a cover and write it to a file. Python PIL supports to write many
-        more image formats, but we're restricting it to only three (I'm too lazy
-        to type more).
+        Draw a cover and write it to a file. Note that only PNG is supported.
         """
         cover_image = draw(title, subtitle, author)
         if filename == "-":
