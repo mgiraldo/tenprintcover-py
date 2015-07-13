@@ -164,12 +164,12 @@ class Image:
         self.context.show_text(line)
 
 
-    def save(self, filename):
+    def save(self, filename=None):
         """
         Save this Image instance as PNG to the given filename. It is assumed
         that the filename extension is .png!
         """
-        self.surface.write_to_png(filename)
+        return self.surface.write_to_png(filename)
 
 
     def font(self, name, properties):
