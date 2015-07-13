@@ -131,8 +131,8 @@ class Image:
             assert not "Should not be here, else 'word' fit into the bounding box"
         # Prepare the context for text rendering.
         self.context.set_source_rgb(*color)
-        font_name, font_size = (font)
-        self.context.select_font_face(font_name)
+        font_name, (font_size, font_slant, font_weight)  = (font)
+        self.context.select_font_face(font_name, font_slant, font_weight)
         self.context.set_font_size(font_size)
         self.context.set_antialias(cairo.ANTIALIAS_DEFAULT)
         # Get some font metrics.
@@ -172,12 +172,13 @@ class Image:
         self.surface.write_to_png(filename)
 
 
-    def font(self, name, size):
+    def font(self, name, properties):
         """
         Return a Pillow font instance for the given Truetype font 'name' of
         the given size 'size'.
         """
-        return (name, self.ty(size))
+        size, slant, weight = (properties)
+        return (name, (self.ty(size), slant, weight))
 
 
     @staticmethod
@@ -475,7 +476,8 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         fill = Image.colorRGB(50, 50, 50)
 
         title_font_size = int(cover_width * 0.08)
-        title_font = cover_image.font("CooperHewitt-Bold", title_font_size)
+        title_font_properties = (title_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+        title_font = cover_image.font("Avenir Next", title_font_properties)
         title_height = int((cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.75)
 
         x = cover_height * cover_margin / 100
@@ -485,7 +487,8 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         cover_image.text(title, x, y, width, height, fill, title_font)
 
         author_font_size = int(cover_width * 0.07)
-        author_font = cover_image.font("CooperHewitt-Book", author_font_size)
+        author_font_properties = (author_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        author_font = cover_image.font("Avenir Next", author_font_properties)
         author_height = int((cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.25)
 
         x = cover_height * cover_margin / 100
