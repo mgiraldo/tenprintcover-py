@@ -289,6 +289,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
     # Draw the actual artwork for the cover. Given the length of the title string,
     # generate an appropriate sized grid and draw C64 PETSCII into each of the cells.
     # https://www.c64-wiki.com/index.php/PETSCII
+    # https://en.wikipedia.org/wiki/PETSCII#/media/File:PET_Keyboard.svg
     def drawArtwork():
         artwork_start_x = 0
         artwork_start_y = cover_height - cover_width
