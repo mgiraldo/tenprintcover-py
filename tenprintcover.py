@@ -575,6 +575,7 @@ def main():
                     status = _draw_and_save(data["title"], data["subtitle"], data["authors"], data["filename"])
                     if status:
                         print("Error generating book cover image, skipping")
+            return 0
         except ValueError:
             print("Error reading from JSON file, exiting")
         except FileNotFoundError:
