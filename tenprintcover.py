@@ -6,6 +6,17 @@ and background see: http://www.nypl.org/blog/2014/09/03/generative-ebook-covers
 """
 
 #
+# Private helper functions.
+#
+
+def _join(s, tail):
+    """
+    Return the concatenation of s + ' ' + tail if s is a truthy string, or tail
+    only otherwise.
+    """
+    return " ".join((s, tail)) if s else tail
+
+#
 # The Image class wraps Cairo functionality into a Processing inspired interface.
 #
 
@@ -143,9 +154,9 @@ class Image:
         # Draw the text one line at a time and ensure the bounding box.
         line = ""
         for word in text.split(" "):
-            _, _, line_width, _, _, _ = self.context.text_extents(line + " " + word)
+            _, _, line_width, _, _, _ = self.context.text_extents(_join(line, word))
             if line_width < width:
-                line += (" " if line else "") + word
+                line = _join(line, word)
             else:
                 if not line:
                     # First word of the line extends beyond the line: chop and done.
