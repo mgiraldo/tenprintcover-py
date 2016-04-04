@@ -10,9 +10,9 @@ Based on: [10 PRINT "BOOK COVER" for Processing]
 Python-based book cover-generating algorithm inspired by [10PRINT](http://10print.org/). Artwork uses the symbols found on the [Commodore PET](https://en.wikipedia.org/wiki/Commodore_PET) keyboard: ![Commodore PET keyboard](https://upload.wikimedia.org/wikipedia/commons/d/db/PET_Keyboard.svg)
 
 #### Requirements
-Runs on Python 3.x.
+Runs on Python 2 and 3.
 
-Requires Python bindings for [Cairo](http://cairographics.org/) installed. While [pycairo](http://cairographics.org/pycairo/) should work but is outdated, the tool currently uses [cairocffi](https://github.com/SimonSapin/cairocffi).
+Requires Python bindings for [Cairo](http://cairographics.org/) installed. While [pycairo](http://cairographics.org/pycairo/) should work but is outdated, this implementation currently uses [cairocffi](https://github.com/SimonSapin/cairocffi).
 
 #### Usage
 There are two ways of generating book covers with this tool: one, generate a single book cover image by passing information directly through the command line arguments; or two, by passing a JSON file with information and generate a batch of book cover images.
