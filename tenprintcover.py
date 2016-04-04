@@ -6,6 +6,15 @@ and background see: http://www.nypl.org/blog/2014/09/03/generative-ebook-covers
 """
 
 #
+# Python 2 truncates integer division to integer, whereas Python 3 turns the
+# result of an integer division into a float. To ensure compatibility across
+# the versions, import the correct division operator. See also PEP 238 and
+# https://docs.python.org/2/library/__future__.html
+#
+
+from __future__ import division
+
+#
 # Private helper functions.
 #
 
