@@ -6,6 +6,14 @@ and background see: http://www.nypl.org/blog/2014/09/03/generative-ebook-covers
 """
 
 #
+# Disable a few pylint warnings: the handling of variables and function names
+# intentionally follows the original Processing source code, instead of the
+# Python conventions.
+#
+# pylint: disable=invalid-name,too-many-arguments
+#
+
+#
 # Python 2 truncates integer division to integer, whereas Python 3 turns the
 # result of an integer division into a float. To ensure compatibility across
 # the versions, import the correct division operator. See also PEP 238 and
@@ -13,6 +21,15 @@ and background see: http://www.nypl.org/blog/2014/09/03/generative-ebook-covers
 #
 
 from __future__ import division
+
+import argparse
+import itertools
+import json
+import math
+import os
+import sys
+
+import cairocffi as cairo
 
 #
 # Private helper functions.
@@ -29,9 +46,7 @@ def _join(s, tail):
 # The Image class wraps Cairo functionality into a Processing inspired interface.
 #
 
-import cairocffi as cairo
-
-class Image:
+class Image(object):
     """
     The Image class is a composition of different modules from Python's Cairo
     bindings. For more documentation on the use of Cairo and the Python bindings
@@ -151,7 +166,7 @@ class Image:
             assert not "Should not be here, else 'word' fit into the bounding box"
         # Prepare the context for text rendering.
         self.context.set_source_rgb(*color)
-        font_name, (font_size, font_slant, font_weight)  = (font)
+        font_name, (font_size, font_slant, font_weight) = (font)
         self.context.select_font_face(font_name, font_slant, font_weight)
         self.context.set_font_size(font_size)
         self.context.set_antialias(cairo.ANTIALIAS_DEFAULT)
@@ -266,13 +281,6 @@ def _clip(value, lower, upper):
 # an Image instance which is a composition of different Cairo functionality.
 #
 
-import argparse
-import itertools
-import json
-import math
-import os
-import sys
-
 def draw(title, subtitle, author, cover_width=400, cover_height=600):
     """
     Main drawing function, which generates a cover of the given dimension and
@@ -294,7 +302,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         base_color = Image.colorHSB((color_seed + color_distance) % 360, base_saturation, base_brightness)
         if invert:
             shape_color, base_color = base_color, shape_color
-        if 0 == counts % 10:
+        if (counts % 10) == 0:
             shape_color, base_color = base_color, shape_color
         return shape_color, base_color
 
@@ -495,10 +503,10 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
     def drawText():
         fill = Image.colorRGB(50, 50, 50)
 
-        title_font_size = int(cover_width * 0.08)
+        title_font_size = cover_width * 0.08
         title_font_properties = (title_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
         title_font = cover_image.font("Avenir Next", title_font_properties)
-        title_height = int((cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.75)
+        title_height = (cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.75
 
         x = cover_height * cover_margin / 100
         y = cover_height * cover_margin / 100 * 2
@@ -506,10 +514,10 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         height = title_height
         cover_image.text(title, x, y, width, height, fill, title_font)
 
-        author_font_size = int(cover_width * 0.07)
+        author_font_size = cover_width * 0.07
         author_font_properties = (author_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         author_font = cover_image.font("Avenir Next", author_font_properties)
-        author_height = int((cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.25)
+        author_height = (cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.25
 
         x = cover_height * cover_margin / 100
         y = title_height
