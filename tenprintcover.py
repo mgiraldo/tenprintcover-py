@@ -355,6 +355,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
             if c in c64_letters:
                 c64_title += c
             else:
+                # random.choice(c64_letters)
                 c64_title += c64_letters[ord(c) % len(c64_letters)]
         return c64_title
 
