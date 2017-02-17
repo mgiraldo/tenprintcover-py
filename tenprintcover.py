@@ -498,14 +498,29 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         else:
             assert not "Implement."
 
-
+    def scale_font(text, font_name, font_properties):
+        # very dumb heuristic
+        (font_size, font_slant, font_weight) = font_properties
+        w = len(text) * font_size
+        print 100 * w
+        if w > cover_width * 7:
+            return  (font_size * 0.8, font_slant, font_weight)
+        else:
+            return font_properties
+        
     # Allocate fonts for the title and the author, and draw the text.
     def drawText():
         fill = Image.colorRGB(50, 50, 50)
 
         title_font_size = cover_width * 0.08
+        subtitle_font_size = cover_width * 0.05
         title_font_properties = (title_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        title_font = cover_image.font("Avenir Next", title_font_properties)
+        subtitle_font_properties = (subtitle_font_size, cairo.FONT_SLANT_NORMAL,
+                                     cairo.FONT_WEIGHT_NORMAL)
+        title_font_properties = scale_font(title, "Arial Unicode MS", title_font_properties)
+        title_font = cover_image.font("Arial Unicode MS", title_font_properties)
+        
+        subtitle_font = cover_image.font("Arial Unicode MS", subtitle_font_properties)
         title_height = (cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.75
 
         x = cover_height * cover_margin / 100
@@ -513,10 +528,13 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         width = cover_width - (2 * cover_height * cover_margin / 100)
         height = title_height
         cover_image.text(title, x, y, width, height, fill, title_font)
+        if subtitle:
+            y = y + title_font_size*2
+            cover_image.text(subtitle, x, y, width, height, fill, subtitle_font)
 
         author_font_size = cover_width * 0.07
         author_font_properties = (author_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        author_font = cover_image.font("Avenir Next", author_font_properties)
+        author_font = cover_image.font("Arial Unicode MS", author_font_properties)
         author_height = (cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.25
 
         x = cover_height * cover_margin / 100
@@ -525,14 +543,13 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         height = author_height
         cover_image.text(author, x, y, width, height, fill, author_font)
 
-
     # Create the new cover image.
     cover_margin = 2
     cover_image = Image(cover_width, cover_height)
 
     # If any, append the book's subtitle to the title.
-    if subtitle:
-        title += ": " + subtitle
+    #if subtitle:
+        #title += ": " + subtitle
 
     # Draw the book cover.
     shape_color, base_color = processColors()
