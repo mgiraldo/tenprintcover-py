@@ -498,16 +498,23 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         else:
             assert not "Implement."
 
+    # If the text is long, use a smaller font size. 
     def scale_font(text, font_name, font_properties):
-        # very dumb heuristic
         (font_size, font_slant, font_weight) = font_properties
         w = len(text) * font_size
-        print 100 * w
-        if w > cover_width * 7:
+        if w > cover_width * 7:   #This is an empirical, unintelligent, heuristic.
             return  (font_size * 0.8, font_slant, font_weight)
         else:
             return font_properties
-        
+    
+    # return a font appropriate for the text. Uses Noto CJK if text contains CJK, otherwise 
+    # Noto Sans. 
+    def select_font(text):
+        for char in text:
+            if ord(char) >= 0x4E00:
+                return 'Noto Sans CJK SC'
+        return 'Noto Sans'
+    
     # Allocate fonts for the title and the author, and draw the text.
     def drawText():
         fill = Image.colorRGB(50, 50, 50)
@@ -517,10 +524,10 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         title_font_properties = (title_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
         subtitle_font_properties = (subtitle_font_size, cairo.FONT_SLANT_NORMAL,
                                      cairo.FONT_WEIGHT_NORMAL)
-        title_font_properties = scale_font(title, "Arial Unicode MS", title_font_properties)
-        title_font = cover_image.font("Arial Unicode MS", title_font_properties)
+        title_font_properties = scale_font(title, select_font(title), title_font_properties)
+        title_font = cover_image.font(select_font(title), title_font_properties)
         
-        subtitle_font = cover_image.font("Arial Unicode MS", subtitle_font_properties)
+        subtitle_font = cover_image.font(select_font(subtitle), subtitle_font_properties)
         title_height = (cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.75
 
         x = cover_height * cover_margin / 100
@@ -534,7 +541,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
 
         author_font_size = cover_width * 0.07
         author_font_properties = (author_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        author_font = cover_image.font("Arial Unicode MS", author_font_properties)
+        author_font = cover_image.font(select_font(author), author_font_properties)
         author_height = (cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.25
 
         x = cover_height * cover_margin / 100
@@ -546,10 +553,6 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
     # Create the new cover image.
     cover_margin = 2
     cover_image = Image(cover_width, cover_height)
-
-    # If any, append the book's subtitle to the title.
-    #if subtitle:
-        #title += ": " + subtitle
 
     # Draw the book cover.
     shape_color, base_color = processColors()
