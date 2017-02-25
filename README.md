@@ -9,14 +9,14 @@ Based on: [10 PRINT "BOOK COVER" for Processing]
 
 Python-based book cover-generating algorithm inspired by [10PRINT](http://10print.org/). Artwork uses the symbols found on the [Commodore PET](https://en.wikipedia.org/wiki/Commodore_PET) keyboard: ![Commodore PET keyboard](https://upload.wikimedia.org/wikipedia/commons/d/db/PET_Keyboard.svg)
 
-#### Requirements
+### Requirements
 Runs on Python 2 and 3.
 
 Requires Python bindings for [Cairo](http://cairographics.org/) installed. While [pycairo](http://cairographics.org/pycairo/) should work but is outdated, this implementation currently uses [cairocffi](https://github.com/SimonSapin/cairocffi).
 
 Requires Noto Sans and Noto Sans CJK SC fonts installed from [Google Internationalization](https://www.google.com/get/noto/).
 
-#### Usage
+### Usage
 There are two ways of generating book covers with this tool: one, generate a single book cover image by passing information directly through the command line arguments; or two, by passing a JSON file with information and generate a batch of book cover images.
 
 Note that the default dimension of the image is set to 600×900 pixels.
@@ -35,9 +35,12 @@ This generates a book cover image for each line in the JSON file, where a single
 
     {"authors": "...", "identifier": "...", "subtitle": "...", "title": "...", "identifier_type": "...", "filename": "..."}
 
-#### Other versions
+### Other versions
 - [10 PRINT "BOOK COVER" for iOS/Objective-C]
 - [10 PRINT "BOOK COVER" for Processing]
 
 [10 PRINT "BOOK COVER" for iOS/Objective-C]: https://github.com/mgiraldo/tenprintcover-ios
 [10 PRINT "BOOK COVER" for Processing]: https://github.com/mgiraldo/tenprintcover-p5
+
+### License
+See [LICENSE](LICENSE).
