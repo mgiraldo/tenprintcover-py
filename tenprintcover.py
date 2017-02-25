@@ -501,14 +501,15 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
     # If the text is long, use a smaller font size. 
     def scale_font(text, font_name, font_properties):
         (font_size, font_slant, font_weight) = font_properties
-        w = len(text) * font_size
-        if w > cover_width * 7:   #This is an empirical, unintelligent, heuristic.
+        width = len(text) * font_size
+        if width > cover_width * 7:   # This is an empirical, unintelligent, heuristic.
             return  (font_size * 0.8, font_slant, font_weight)
         else:
             return font_properties
     
-    # return a font appropriate for the text. Uses Noto CJK if text contains CJK, otherwise 
-    # Noto Sans. 
+    # Return a font appropriate for the text. Uses Noto CJK if text contains letters of
+    # Simplified Chinese, Traditional Chinese, Japanese, and Korean (CJK), otherwise Noto Sans. 
+    # http://www.unicode.org/faq/han_cjk.html
     def select_font(text):
         for char in text:
             if ord(char) >= 0x4E00:
@@ -522,8 +523,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         title_font_size = cover_width * 0.08
         subtitle_font_size = cover_width * 0.05
         title_font_properties = (title_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        subtitle_font_properties = (subtitle_font_size, cairo.FONT_SLANT_NORMAL,
-                                     cairo.FONT_WEIGHT_NORMAL)
+        subtitle_font_properties = (subtitle_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         title_font_properties = scale_font(title, select_font(title), title_font_properties)
         title_font = cover_image.font(select_font(title), title_font_properties)
         
