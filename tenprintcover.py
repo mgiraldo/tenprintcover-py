@@ -3,6 +3,7 @@
 """
 Python Implementation of the TenPrint Cover Processing script. For more information
 and background see: http://www.nypl.org/blog/2014/09/03/generative-ebook-covers
+This file is MIT licensed and maintained at https://github.com/mgiraldo/tenprintcover-py
 """
 
 #
@@ -171,12 +172,13 @@ class Image(object):
         self.context.set_font_size(font_size)
         self.context.set_antialias(cairo.ANTIALIAS_DEFAULT)
         # Get some font metrics.
-        font_asc, _, font_height, _, _ = self.context.font_extents()
+        font_asc, _, self.font_height, _, _ = self.context.font_extents()
         # Initialize text cursor to the baseline of the font.
         width, height = self.tx(width), self.ty(height)
         w_x, w_y = self.tx(x), font_asc + self.ty(y)
         # Draw the text one line at a time and ensure the bounding box.
         line = ""
+        nlines = 1
         for word in text.split(" "):
             _, _, line_width, _, _, _ = self.context.text_extents(_join(line, word))
             if line_width < width:
@@ -186,17 +188,21 @@ class Image(object):
                     # First word of the line extends beyond the line: chop and done.
                     self.context.move_to(w_x, w_y)
                     self.context.show_text(chop(word))
-                    return
+                    return nlines
                 else:
                     # Filled a line, render it, and move on to the next line.
                     self.context.move_to(w_x, w_y)
                     self.context.show_text(line)
                     line = word
-                    w_y += font_height
+                    w_y += self.font_height
+                    
                     if w_y > height:
-                        return
+                        return nlines
+                    else:
+                        nlines += 1
         self.context.move_to(w_x, w_y)
         self.context.show_text(line)
+        return nlines
 
 
     def save(self, filename=None):
@@ -502,8 +508,10 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
     def scale_font(text, font_name, font_properties):
         (font_size, font_slant, font_weight) = font_properties
         w = len(text) * font_size
-        if w > cover_width * 7:   #This is an empirical, unintelligent, heuristic.
+        if w > cover_width * 3:   #This is an empirical, unintelligent, heuristic.
             return  (font_size * 0.8, font_slant, font_weight)
+        elif w < cover_width :
+            return  (font_size * 1.2, font_slant, font_weight)
         else:
             return font_properties
     
@@ -524,26 +532,28 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         title_font_properties = (title_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
         subtitle_font_properties = (subtitle_font_size, cairo.FONT_SLANT_NORMAL,
                                      cairo.FONT_WEIGHT_NORMAL)
-        title_font_properties = scale_font(title, select_font(title), title_font_properties)
-        title_font = cover_image.font(select_font(title), title_font_properties)
-        
-        subtitle_font = cover_image.font(select_font(subtitle), subtitle_font_properties)
+        title_font_family = select_font(title)
+        subtitle_font_family = select_font(subtitle)
+        title_font_properties = scale_font(title, title_font_family, title_font_properties)
+        subtitle_font_properties = scale_font(subtitle, subtitle_font_family, subtitle_font_properties)
+        title_font = cover_image.font(title_font_family, title_font_properties)
+        subtitle_font = cover_image.font(subtitle_font_family, subtitle_font_properties)
         title_height = (cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.75
 
         x = cover_height * cover_margin / 100
         y = cover_height * cover_margin / 100 * 2
         width = cover_width - (2 * cover_height * cover_margin / 100)
         height = title_height
-        cover_image.text(title, x, y, width, height, fill, title_font)
+        title_lines = cover_image.text(title, x, y, width, height, fill, title_font)
         if subtitle:
-            y = y + title_font_size*2
+            y = min( y + cover_image.font_height * title_lines * cover_height, title_height - subtitle_font_properties[0])
+            
             cover_image.text(subtitle, x, y, width, height, fill, subtitle_font)
 
         author_font_size = cover_width * 0.07
         author_font_properties = (author_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         author_font = cover_image.font(select_font(author), author_font_properties)
         author_height = (cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.25
-
         x = cover_height * cover_margin / 100
         y = title_height
         width = cover_width - (2 * cover_height * cover_margin / 100)
