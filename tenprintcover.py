@@ -310,8 +310,8 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         counts = len(title) + len(author)
         color_seed = int(_map(_clip(counts, 2, 80), 2, 80, 10, 360))
         shape_color = Image.colorHSB(color_seed, base_saturation, base_brightness-(counts % 20))
-        base_color = Image.colorHSB((
-            color_seed + color_distance) % 360,
+        base_color = Image.colorHSB(
+            (color_seed + color_distance) % 360,
             base_saturation,
             base_brightness
         )
@@ -516,17 +516,16 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
     # If the text is long, use a smaller font size.
     def scale_font(text, font_name, font_properties):
         (font_size, font_slant, font_weight) = font_properties
-        w = len(text) * font_size
-        if w > cover_width * 3:   #This is an empirical, unintelligent, heuristic.
+        width = len(text) * font_size
+        if width > cover_width * 3:   #This is an empirical, unintelligent, heuristic.
             return  (font_size * 0.8, font_slant, font_weight)
-        elif w < cover_width :
+        elif width < cover_width :
             return  (font_size * 1.2, font_slant, font_weight)
         else:
             return font_properties
 
-    # return a font appropriate for the text. Uses Noto CJK if text contains CJK, otherwise
-    # Noto Sans.
-    
+    # return a font appropriate for the text. Uses Noto CJK if text contains Chinese,
+    # Japanese, or Korean characters, otherwise Noto Sans.
     def select_font(text):
         for char in text:
             if ord(char) >= 0x4E00:
@@ -534,7 +533,6 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         return 'Noto Sans'
 
     # Allocate fonts for the title and the author, and draw the text.
-    
     def drawText():
         fill = Image.colorRGB(50, 50, 50)
 
