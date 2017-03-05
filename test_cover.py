@@ -13,8 +13,8 @@ class TestMakeCovers(unittest.TestCase):
 
     def test_cover(self):
         cover_image = tenprintcover.draw(
-            "A truly amazing book", 
-            "(但不是那么神奇)", 
+            "A truly amazing book",
+            "(但不是那么神奇)",
             "Donald Duck and Mickey Mouse"
         )
         with open(self.test_path, 'w+') as cover:
