@@ -570,16 +570,16 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
             cairo.FONT_SLANT_NORMAL,
             cairo.FONT_WEIGHT_NORMAL
         )
-        
         author_font = cover_image.font(select_font(author), author_font_properties)
         author_height = (cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.25
+
         x = cover_height * cover_margin / 100
         y = title_height
         width = cover_width - (2 * cover_height * cover_margin / 100)
         height = author_height
         cover_image.text(author, x, y, width, height, fill, author_font)
 
-        
+
     # Create the new cover image.
     cover_margin = 2
     cover_image = Image(cover_width, cover_height)
