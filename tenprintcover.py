@@ -570,7 +570,7 @@ def main():
                 try:
                     with open(filename, "wb") as f:
                         cover_image.save(f)
-                except FileNotFoundError:
+                except (OSError, IOError):
                     print("Error opening target file " + filename)
                     return 1
             else:
@@ -607,7 +607,7 @@ def main():
             return 0
         except ValueError:
             print("Error reading from JSON file, exiting")
-        except FileNotFoundError:
+        except (OSError, IOError):
             print("JSON cover file does not exist: " + args.json_covers)
 
     # Generate only a single cover based on the given command line arguments.
