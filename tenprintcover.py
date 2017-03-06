@@ -141,9 +141,9 @@ class Image(object):
         self.context.translate(self.tx(x+(width/2)), self.ty(y+(height/2)))
         self.context.scale(self.tx(width/2), self.ty(height/2))
         self.context.arc(0.0, 0.0, 1.0 - (self.tx(thick)/2),
-            (2*math.pi*start)/360,
-            (2*math.pi*end)/360
-        )
+                         (2*math.pi*start)/360,
+                         (2*math.pi*end)/360
+                        )
         self.context.set_line_width(self.tx(thick))
         self.context.stroke()
         self.context.restore()
@@ -512,13 +512,13 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
             assert not "Implement."
 
     # If the text is long, use a smaller font size.
-    def scale_font(text, font_name, font_properties):
+    def scale_font(text, font_properties):
         (font_size, font_slant, font_weight) = font_properties
         width = len(text) * font_size
-        if width > cover_width * 3:   #This is an empirical, unintelligent, heuristic.
-            return  (font_size * 0.8, font_slant, font_weight)
-        elif width < cover_width :
-            return  (font_size * 1.2, font_slant, font_weight)
+        if width > cover_width * 3: # This is an empirical, unintelligent, heuristic.
+            return (font_size * 0.8, font_slant, font_weight)
+        elif width < cover_width:
+            return (font_size * 1.2, font_slant, font_weight)
         else:
             return font_properties
 
@@ -528,8 +528,8 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
     def select_font(text):
         for char in text:
             if ord(char) >= 0x4E00:
-                return 'Noto Sans CJK SC'
-        return 'Noto Sans'
+                return "Noto Sans CJK SC"
+        return "Noto Sans"
 
     # Allocate fonts for the title and the author, and draw the text.
     def drawText():
@@ -541,10 +541,9 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         subtitle_font_properties = (subtitle_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         title_font_family = select_font(title)
         subtitle_font_family = select_font(subtitle)
-        title_font_properties = scale_font(title, title_font_family, title_font_properties)
+        title_font_properties = scale_font(title, title_font_properties)
         subtitle_font_properties = scale_font(
             subtitle,
-            subtitle_font_family,
             subtitle_font_properties
         )
         title_font = cover_image.font(title_font_family, title_font_properties)
