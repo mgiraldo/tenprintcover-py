@@ -32,9 +32,7 @@ import sys
 
 import cairocffi as cairo
 
-PY2 = sys.version_info[0] == 2
-if PY2:
-    FileNotFoundError = IOError
+
 #
 # Private helper functions.
 #
@@ -525,7 +523,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
             return font_properties
 
     # Return a font appropriate for the text. Uses Noto CJK if text contains letters of
-    # Simplified Chinese, Traditional Chinese, Japanese, and Korean (CJK), otherwise Noto Sans. 
+    # Simplified Chinese, Traditional Chinese, Japanese, and Korean (CJK), otherwise Noto Sans.
     # http://www.unicode.org/faq/han_cjk.html
     def select_font(text):
         for char in text:
