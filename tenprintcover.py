@@ -201,7 +201,6 @@ class Image(object):
                     self.context.show_text(line)
                     line = word
                     w_y += font_height
-
                     if w_y > height:
                         return nlines, font_height
                     nlines += 1
@@ -524,8 +523,9 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         else:
             return font_properties
 
-    # return a font appropriate for the text. Uses Noto CJK if text contains Chinese,
-    # Japanese, or Korean characters, otherwise Noto Sans.
+    # Return a font appropriate for the text. Uses Noto CJK if text contains letters of
+    # Simplified Chinese, Traditional Chinese, Japanese, and Korean (CJK), otherwise Noto Sans. 
+    # http://www.unicode.org/faq/han_cjk.html
     def select_font(text):
         for char in text:
             if ord(char) >= 0x4E00:
@@ -539,8 +539,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         title_font_size = cover_width * 0.08
         subtitle_font_size = cover_width * 0.05
         title_font_properties = (title_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        subtitle_font_properties = (subtitle_font_size, cairo.FONT_SLANT_NORMAL,
-                                     cairo.FONT_WEIGHT_NORMAL)
+        subtitle_font_properties = (subtitle_font_size, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         title_font_family = select_font(title)
         subtitle_font_family = select_font(subtitle)
         title_font_properties = scale_font(title, title_font_family, title_font_properties)
@@ -563,7 +562,6 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
                 y + font_height * title_lines * cover_height,
                 title_height - subtitle_font_properties[0]
             )
-
             cover_image.text(subtitle, x, y, width, height, fill, subtitle_font)
 
         author_font_size = cover_width * 0.07
@@ -572,6 +570,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
             cairo.FONT_SLANT_NORMAL,
             cairo.FONT_WEIGHT_NORMAL
         )
+        
         author_font = cover_image.font(select_font(author), author_font_properties)
         author_height = (cover_height - cover_width - (cover_height * cover_margin / 100)) * 0.25
         x = cover_height * cover_margin / 100
@@ -580,6 +579,7 @@ def draw(title, subtitle, author, cover_width=400, cover_height=600):
         height = author_height
         cover_image.text(author, x, y, width, height, fill, author_font)
 
+        
     # Create the new cover image.
     cover_margin = 2
     cover_image = Image(cover_width, cover_height)
