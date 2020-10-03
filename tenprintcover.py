@@ -183,7 +183,7 @@ class Image(object):
         # Draw the text one line at a time and ensure the bounding box.
         line = ""
         nlines = 1
-        for word in text.split(" "):
+        for word in text.split():
             _, _, line_width, _, _, _ = self.context.text_extents(_join(line, word))
             if line_width < width:
                 line = _join(line, word)
